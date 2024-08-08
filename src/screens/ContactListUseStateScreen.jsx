@@ -1,24 +1,8 @@
-import React, { useState, useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, SectionList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-
-const contacts = [
-  { id: '1', name: 'Peter Gangmei', type: 'myCard', phone: '982-144-9581' },
-  { id: '2', name: 'Abale', phone: '982-144-9582' },
-  { id: '3', name: 'Abale Abale', phone: '982-144-9583' },
-  { id: '4', name: 'Abhilash Alfred Is', phone: '982-144-9584' },
-  { id: '5', name: 'Abhilash', phone: '982-144-9585' },
-  { id: '6', name: 'Abhishek', phone: '982-144-9586' },
-  { id: '7', name: 'Abung Dilan', phone: '982-144-9587' },
-  { id: '8', name: 'Abung Dilanang', phone: '982-144-9588' },
-  { id: '9', name: 'Achai Jailourei', phone: '982-144-9589' },
-  { id: '10', name: 'John Doe', phone: '982-144-9590' },
-  { id: '11', name: 'Jane Smith', phone: '982-144-9591' },
-  { id: '12', name: 'Michael Johnson', phone: '982-144-9592' },
-  { id: '13', name: 'Emily Davis', phone: '982-144-9593' },
-  { id: '14', name: 'Jessica Brown', phone: '982-144-9594' },
-  { id: '15', name: 'Daniel Wilson', phone: '982-144-9595' },
-];
+import { useSelector, useDispatch } from 'react-redux';
+import { loadContacts } from '../config/redux/actions';
 
 const ContactListScreen = ({ navigation }) => {
   const [search, setSearch] = useState('');
@@ -28,25 +12,12 @@ const ContactListScreen = ({ navigation }) => {
   const stickySearchRef = useRef(null);
   const searchInputRef = useRef(null);
   const stickySearchInputRef = useRef(null);
+  const contacts = useSelector(state => state.contacts);
+  const dispatch = useDispatch();
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: !isSearchFocused,
-      header: () => (
-        <View style={styles.headerContainer}>
-          <View style={styles.headerLeft}>
-            <TouchableOpacity style={styles.headerIcon}>
-              <Icon name="chevron-back" size={27} color="#007AFF" />
-              <Text style={styles.headerText}>Lists</Text>
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('AddContact')}>
-            <Icon name="add" size={30} color="#007AFF" />
-          </TouchableOpacity>
-        </View>
-      ),
-    });
-  }, [navigation, isSearchFocused]);
+  useEffect(() => {
+    dispatch(loadContacts());
+  }, [dispatch]);
 
   const handleScroll = (event) => {
     searchContainerRef.current?.measure((fx, fy, width, height, px, py) => {
@@ -62,7 +33,6 @@ const ContactListScreen = ({ navigation }) => {
     ? [{ title: 'Top Name Matches', data: filteredContacts }]
     : Object.values(
         contacts
-          .filter(contact => contact.name !== 'Peter Gangmei')
           .sort((a, b) => a.name.localeCompare(b.name))
           .reduce((acc, contact) => {
             const firstLetter = contact.name[0].toUpperCase();
@@ -121,11 +91,10 @@ const ContactListScreen = ({ navigation }) => {
           sections={sections}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.contactItem}
-              onPress={() => navigation.navigate('ContactDetail', { contact: item })}
-            >
-              <Text style={styles.contactName}>{item.name}</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('ContactDetail', { contact: item })}>
+              <View style={styles.contactItem}>
+                <Text style={styles.contactName}>{item.name}</Text>
+              </View>
             </TouchableOpacity>
           )}
           renderSectionHeader={({ section: { title } }) => (
@@ -175,35 +144,12 @@ const styles = StyleSheet.create({
   listContentContainer: {
     paddingHorizontal: 10,
   },
-  headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    height: 80,
-    backgroundColor: '#000',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerText: {
-    fontSize: 18,
-    color: '#007AFF',
-    marginRight: 10,
-  },
   headerTitle: {
     fontSize: 34,
     fontWeight: 'bold',
     paddingHorizontal: 10,
     paddingVertical: 10,
     color: '#fff',
-  },
-  headerIcon: {
-    marginHorizontal: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -238,13 +184,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
   },
-  myName:{
-    fontWeight:'bold',
-    fontSize:20
+  myName: {
+    fontWeight: 'bold',
+    fontSize: 20,
   },
   contactType: {
     color: '#999',
-    fontSize: 16,
+    fontSize: 14,
   },
   sectionHeader: {
     paddingHorizontal: 10,
@@ -254,9 +200,9 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   profileIcon: {
-    borderRadius: 50,
-    width: 80,
-    height: 80,
+    borderRadius: 25,
+    width: 50,
+    height: 50,
   },
   stickySearchContainer: {
     position: 'absolute',

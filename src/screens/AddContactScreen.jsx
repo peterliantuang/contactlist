@@ -1,24 +1,41 @@
 import React, { useState, useLayoutEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import LineBreak from '../utils/LineBreak';
+import { useDispatch } from 'react-redux';
+import { addContact, updateContact } from '../config/redux/actions';
 
 const AddContactScreen = ({ route, navigation }) => {
   const { contact = {}, isEdit = false } = route.params || {};
   const [name, setName] = useState(contact?.name || '');
   const [phone, setPhone] = useState(contact?.phone || '');
+  const dispatch = useDispatch();
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerShown: false, // Hide the default app bar
+      headerLeft: () => (
+        <TouchableOpacity onPress={handleCancel}>
+          <Text style={styles.cancelText}>Cancel</Text>
+        </TouchableOpacity>
+      ),
+      headerTitle: isEdit ? 'Edit Contact' : 'New Contact',
+      headerTitleAlign: 'center', // Center align the title
+      headerRight: () => (
+        <TouchableOpacity onPress={handleDone}>
+          <Text style={styles.doneText}>Done</Text>
+        </TouchableOpacity>
+      ),
     });
-  }, [navigation]);
+  }, [navigation, isEdit]);
 
   const handleCancel = () => {
     navigation.goBack();
   };
 
   const handleDone = () => {
-    // Handle saving the new or edited contact
+    if (isEdit) {
+      dispatch(updateContact({ ...contact, name, phone }));
+    } else {
+      dispatch(addContact({ name, phone }));
+    }
     navigation.goBack();
   };
 
@@ -30,28 +47,17 @@ const AddContactScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.customAppBar}>
-        <TouchableOpacity onPress={handleCancel}>
-          <Text style={styles.cancelText}>Cancel</Text>
+      <View style={styles.photoSection}>
+        {name ? (
+          <View style={styles.profileImage}>
+            <Text style={styles.initials}>{getInitials(name)}</Text>
+          </View>
+        ) : (
+          <Image source={require('../assets/user-placeholder.png')} style={styles.photo} />
+        )}
+        <TouchableOpacity>
+          <Text style={styles.addPhotoText}>Add Photo</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{isEdit ? 'Edit Contact' : 'New Contact'}</Text>
-        <TouchableOpacity onPress={handleDone}>
-          <Text style={styles.doneText}>Done</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.upperSection}>
-        <View style={styles.photoSection}>
-          {name ? (
-            <View style={styles.profileImage}>
-              <Text style={styles.initials}>{getInitials(name)}</Text>
-            </View>
-          ) : (
-            <Image source={require('../assets/user-placeholder.png')} style={styles.photo} />
-          )}
-          <TouchableOpacity>
-            <Text style={styles.addPhotoText}>Add Photo</Text>
-          </TouchableOpacity>
-        </View>
       </View>
       <TextInput
         style={styles.input}
@@ -76,50 +82,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-  },
-  customAppBar: {
-    borderTopLeftRadius:15,
-    borderTopRightRadius:15,
-    marginTop:15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    backgroundColor: '#292828',
-  },
-  headerTitle: {
-    fontSize: 18,
-    color: '#000',
-    textAlign: 'center',
+    paddingHorizontal: 20,
   },
   cancelText: {
     color: '#007AFF',
     fontSize: 18,
+    paddingHorizontal: 15,
   },
   doneText: {
     color: '#007AFF',
     fontSize: 18,
-  },
-  upperSection: {
-    backgroundColor: '#292828',
-    height:250,
-    paddingBottom: 20,
+    paddingHorizontal: 15,
   },
   photoSection: {
     alignItems: 'center',
-    
     marginVertical: 20,
   },
   photo: {
-    width: 150,
-    height: 150,
-    borderRadius: 100,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   profileImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 100,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: '#888',
     alignItems: 'center',
     justifyContent: 'center',
@@ -134,13 +121,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   input: {
-    backgroundColor: '#d3d3d3',
-    borderBottomColor:'#fff',
-    marginTop:2,
+    backgroundColor: '#333',
     color: '#fff',
     fontSize: 18,
     padding: 10,
-    paddingHorizontal:40,
+    borderRadius: 10,
+    marginVertical: 5,
   },
 });
 

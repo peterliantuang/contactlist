@@ -1,9 +1,12 @@
 import React, { useLayoutEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useDispatch } from 'react-redux';
+import { deleteContact } from '../config/redux/actions';
 
 const ContactDetailScreen = ({ route, navigation }) => {
   const { contact } = route.params;
+  const dispatch = useDispatch();
 
   const getInitials = (name) => {
     const nameArray = name.split(' ');
@@ -16,6 +19,11 @@ const ContactDetailScreen = ({ route, navigation }) => {
       headerShown: false,
     });
   }, [navigation, contact]);
+
+  const handleDelete = () => {
+    dispatch(deleteContact(contact.id));
+    navigation.goBack();
+  };
 
   return (
     <View style={styles.container}>
@@ -66,7 +74,10 @@ const ContactDetailScreen = ({ route, navigation }) => {
         <Text style={styles.optionText}>Add to Favourites</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.option}>
-        <Text style={styles.optionTextDelete}>Delete Contact</Text>
+        <Text style={styles.optionText}>Add to Emergency Contacts</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.option} onPress={handleDelete}>
+        <Text style={styles.optionText}>Delete Contact</Text>
       </TouchableOpacity>
     </View>
   );
@@ -85,9 +96,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 10,
-    borderTopEndRadius:10,
-    borderTopStartRadius:10,
-    marginTop:20,
     paddingVertical: 15,
     backgroundColor: '#d3d3d3',
   },
@@ -176,11 +184,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#007AFF',
   },
-  optionTextDelete:{
-    fontSize: 17,
-    fontWeight:'bold',
-    color: '#eb0202',
-  }
 });
 
 export default ContactDetailScreen;
