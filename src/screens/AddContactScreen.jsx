@@ -1,26 +1,15 @@
 import React, { useState, useLayoutEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import LineBreak from '../utils/LineBreak';
 
-const AddContactScreen = ({ navigation }) => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [company, setCompany] = useState('');
-  const [phones, setPhones] = useState(['']);
+const AddContactScreen = ({ route, navigation }) => {
+  const { contact = {}, isEdit = false } = route.params || {};
+  const [name, setName] = useState(contact?.name || '');
+  const [phone, setPhone] = useState(contact?.phone || '');
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity onPress={handleCancel}>
-          <Text style={styles.cancelText}>Cancel</Text>
-        </TouchableOpacity>
-      ),
-      headerTitle: 'New Contact',
-      headerTitleAlign: 'center', // Center align the title
-      headerRight: () => (
-        <TouchableOpacity onPress={handleDone}>
-          <Text style={styles.doneText}>Done</Text>
-        </TouchableOpacity>
-      ),
+      headerShown: false, // Hide the default app bar
     });
   }, [navigation]);
 
@@ -29,64 +18,57 @@ const AddContactScreen = ({ navigation }) => {
   };
 
   const handleDone = () => {
-    // Handle saving the new contact
+    // Handle saving the new or edited contact
     navigation.goBack();
   };
 
-  const addPhoneField = () => {
-    setPhones([...phones, '']);
-  };
-
-  const handlePhoneChange = (text, index) => {
-    const newPhones = phones.slice();
-    newPhones[index] = text;
-    setPhones(newPhones);
+  const getInitials = (name) => {
+    const nameArray = name.split(' ');
+    const initials = nameArray.map(part => part.charAt(0)).join('');
+    return initials.toUpperCase();
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.photoSection}>
-        <Image source={require('../assets/user-placeholder.png')} style={styles.photo} />
-        <TouchableOpacity>
-          <Text style={styles.addPhotoText}>Add Photo</Text>
+    <View style={styles.container}>
+      <View style={styles.customAppBar}>
+        <TouchableOpacity onPress={handleCancel}>
+          <Text style={styles.cancelText}>Cancel</Text>
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>{isEdit ? 'Edit Contact' : 'New Contact'}</Text>
+        <TouchableOpacity onPress={handleDone}>
+          <Text style={styles.doneText}>Done</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.upperSection}>
+        <View style={styles.photoSection}>
+          {name ? (
+            <View style={styles.profileImage}>
+              <Text style={styles.initials}>{getInitials(name)}</Text>
+            </View>
+          ) : (
+            <Image source={require('../assets/user-placeholder.png')} style={styles.photo} />
+          )}
+          <TouchableOpacity>
+            <Text style={styles.addPhotoText}>Add Photo</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <TextInput
         style={styles.input}
-        placeholder="First name"
+        placeholder="Full name"
         placeholderTextColor="#888"
-        value={firstName}
-        onChangeText={setFirstName}
+        value={name}
+        onChangeText={setName}
       />
       <TextInput
         style={styles.input}
-        placeholder="Last name"
+        placeholder="Phone"
         placeholderTextColor="#888"
-        value={lastName}
-        onChangeText={setLastName}
+        keyboardType="phone-pad"
+        value={phone}
+        onChangeText={setPhone}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Company"
-        placeholderTextColor="#888"
-        value={company}
-        onChangeText={setCompany}
-      />
-      {phones.map((phone, index) => (
-        <TextInput
-          key={index}
-          style={styles.input}
-          placeholder="Phone"
-          placeholderTextColor="#888"
-          value={phone}
-          onChangeText={(text) => handlePhoneChange(text, index)}
-          keyboardType="phone-pad"
-        />
-      ))}
-      <TouchableOpacity style={styles.addButton} onPress={addPhoneField}>
-        <Text style={styles.addButtonText}>+ add phone</Text>
-      </TouchableOpacity>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -94,26 +76,57 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    paddingHorizontal: 20,
+  },
+  customAppBar: {
+    borderTopLeftRadius:15,
+    borderTopRightRadius:15,
+    marginTop:15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    backgroundColor: '#292828',
+  },
+  headerTitle: {
+    fontSize: 18,
+    color: '#000',
+    textAlign: 'center',
   },
   cancelText: {
     color: '#007AFF',
     fontSize: 18,
-    paddingHorizontal: 15,
   },
   doneText: {
     color: '#007AFF',
     fontSize: 18,
-    paddingHorizontal: 15,
+  },
+  upperSection: {
+    backgroundColor: '#292828',
+    height:250,
+    paddingBottom: 20,
   },
   photoSection: {
     alignItems: 'center',
+    
     marginVertical: 20,
   },
   photo: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 150,
+    height: 150,
+    borderRadius: 100,
+  },
+  profileImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 100,
+    backgroundColor: '#888',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  initials: {
+    fontSize: 36,
+    color: '#fff',
   },
   addPhotoText: {
     color: '#007AFF',
@@ -121,24 +134,13 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   input: {
-    backgroundColor: '#333',
+    backgroundColor: '#d3d3d3',
+    borderBottomColor:'#fff',
+    marginTop:2,
     color: '#fff',
     fontSize: 18,
     padding: 10,
-    borderRadius: 10,
-    marginVertical: 5,
-  },
-  addButton: {
-    backgroundColor: '#333',
-    borderRadius: 10,
-    padding: 15,
-    marginVertical: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: '#00FF00',
-    fontSize: 18,
+    paddingHorizontal:40,
   },
 });
 

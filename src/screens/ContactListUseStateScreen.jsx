@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   },
   contactType: {
     color: '#999',
-    fontSize: 14,
+    fontSize: 16,
   },
   sectionHeader: {
     paddingHorizontal: 10,
@@ -254,9 +254,9 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   profileIcon: {
-    borderRadius: 25,
-    width: 50,
-    height: 50,
+    borderRadius: 50,
+    width: 80,
+    height: 80,
   },
   stickySearchContainer: {
     position: 'absolute',

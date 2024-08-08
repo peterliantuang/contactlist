@@ -1,31 +1,37 @@
 import React, { useLayoutEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const ContactDetailScreen = ({ route, navigation }) => {
   const { contact } = route.params;
 
+  const getInitials = (name) => {
+    const nameArray = name.split(' ');
+    const initials = nameArray.map(part => part.charAt(0)).join('');
+    return initials.toUpperCase();
+  };
+
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-back" size={30} color="#007AFF" style={{ paddingLeft: 10 }} />
-        </TouchableOpacity>
-      ),
-      headerTitle: contact.name,
-      headerTitleAlign: 'center',
-      headerRight: () => (
-        <TouchableOpacity onPress={() => { /* Handle edit action */ }}>
-          <Text style={styles.editText}>Edit</Text>
-        </TouchableOpacity>
-      ),
+      headerShown: false,
     });
   }, [navigation, contact]);
 
   return (
     <View style={styles.container}>
+      <View style={styles.customAppBar}>
+        <TouchableOpacity style={styles.appbarItems} onPress={() => navigation.goBack()}>
+          <Icon name="chevron-back" size={30} color="#007AFF" style={{ paddingLeft: 10 }} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}></Text>
+        <TouchableOpacity style={styles.appbarItems} onPress={() => navigation.navigate('AddContact', { contact, isEdit: true })}>
+          <Text style={styles.editText}>Edit</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.profileSection}>
-        <Image source={require('../assets/user1.webp')} style={styles.profileImage} />
+        <View style={styles.profileImage}>
+          <Text style={styles.initials}>{getInitials(contact.name)}</Text>
+        </View>
         <Text style={styles.contactName}>{contact.name}</Text>
         <View style={styles.actionIcons}>
           <TouchableOpacity style={styles.actionIcon}>
@@ -60,7 +66,7 @@ const ContactDetailScreen = ({ route, navigation }) => {
         <Text style={styles.optionText}>Add to Favourites</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.option}>
-        <Text style={styles.optionText}>Add to Emergency Contacts</Text>
+        <Text style={styles.optionTextDelete}>Delete Contact</Text>
       </TouchableOpacity>
     </View>
   );
@@ -71,6 +77,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
+  appbarItems:{
+   
+  },
+  customAppBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    borderTopEndRadius:10,
+    borderTopStartRadius:10,
+    marginTop:20,
+    paddingVertical: 15,
+    backgroundColor: '#d3d3d3',
+  },
+  headerTitle: {
+    fontSize: 18,
+    color: '#000',
+    textAlign: 'center',
+    flex: 1,
+  },
   editText: {
     fontSize: 18,
     color: '#007AFF',
@@ -79,16 +105,23 @@ const styles = StyleSheet.create({
   profileSection: {
     alignItems: 'center',
     paddingVertical: 20,
-    backgroundColor: '#1c1c1c',
+    backgroundColor: '#d3d3d3',
   },
   profileImage: {
     width: 100,
     height: 100,
     borderRadius: 50,
+    backgroundColor: '#888',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  initials: {
+    fontSize: 36,
+    color: '#fff',
   },
   contactName: {
     fontSize: 24,
-    color: '#fff',
+    color: '#000',
     marginTop: 10,
   },
   actionIcons: {
@@ -96,10 +129,10 @@ const styles = StyleSheet.create({
     marginTop: 25,
   },
   actionIcon: {
-    backgroundColor:'#6b6e6c',
-    padding:12,
-    width:85,
-    borderRadius:10,
+    backgroundColor: '#6b6e6c',
+    padding: 12,
+    width: 85,
+    borderRadius: 10,
     marginHorizontal: 3,
     alignItems: 'center',
   },
@@ -143,6 +176,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#007AFF',
   },
+  optionTextDelete:{
+    fontSize: 17,
+    fontWeight:'bold',
+    color: '#eb0202',
+  }
 });
 
 export default ContactDetailScreen;
