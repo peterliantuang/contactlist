@@ -1,50 +1,38 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid';
 
-const initialState = {
-  contacts: [],
-  loading: true,
-};
+const STORAGE_KEY = 'contacts';
+
+export const loadContacts = createAsyncThunk('contacts/loadContacts', async () => {
+  const contacts = await AsyncStorage.getItem(STORAGE_KEY);
+  return contacts ? JSON.parse(contacts) : [];
+});
+
+export const saveContacts = createAsyncThunk('contacts/saveContacts', async (contacts) => {
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
+});
 
 const contactsSlice = createSlice({
   name: 'contacts',
-  initialState,
+  initialState: [],
   reducers: {
-    setContacts: (state, action) => {
-      state.contacts = action.payload;
-      state.loading = false;
-    },
     addContact: (state, action) => {
-      state.contacts.push(action.payload);
-      AsyncStorage.setItem('contacts', JSON.stringify(state.contacts));
+      state.push({ id: uuid.v4(), ...action.payload });
+    },
+    updateContact: (state, action) => {
+      const { id, ...changes } = action.payload;
+      const index = state.findIndex(contact => contact.id === id);
+      if (index !== -1) {
+        state[index] = { ...state[index], ...changes };
+      }
     },
     deleteContact: (state, action) => {
-      state.contacts = state.contacts.filter(contact => contact.id !== action.payload);
-      AsyncStorage.setItem('contacts', JSON.stringify(state.contacts));
-    },
-    setLoading: (state, action) => {
-      state.loading = action.payload;
+      return state.filter(contact => contact.id !== action.payload);
     },
   },
+ 
 });
 
-export const { setContacts, addContact, deleteContact, setLoading } = contactsSlice.actions;
-
-export const loadContacts = () => async dispatch => {
-  dispatch(setLoading(true));
-  try {
-    const contacts = await AsyncStorage.getItem('contacts');
-    if (contacts !== null) {
-      dispatch(setContacts(JSON.parse(contacts)));
-    } else {
-      dispatch(setContacts([]));
-    }
-  } catch (error) {
-    console.error(error);
-    dispatch(setContacts([])); // In case of error, set contacts to empty array
-  } finally {
-    dispatch(setLoading(false));
-  }
-};
-
+export const { addContact, updateContact, deleteContact } = contactsSlice.actions;
 export default contactsSlice.reducer;

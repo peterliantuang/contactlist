@@ -2,7 +2,7 @@ import React, { useLayoutEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useDispatch } from 'react-redux';
-import { deleteContact } from '../config/redux/actions';
+import { deleteContact } from '../config/redux/contactsSlice';
 
 const ContactDetailScreen = ({ route, navigation }) => {
   const { contact } = route.params;
@@ -67,15 +67,6 @@ const ContactDetailScreen = ({ route, navigation }) => {
         </View>
         <Text style={styles.detailLabel}>Notes</Text>
       </View>
-      <TouchableOpacity style={styles.option}>
-        <Text style={styles.optionText}>Share Contact</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.option}>
-        <Text style={styles.optionText}>Add to Favourites</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.option}>
-        <Text style={styles.optionText}>Add to Emergency Contacts</Text>
-      </TouchableOpacity>
       <TouchableOpacity style={styles.option} onPress={handleDelete}>
         <Text style={styles.optionText}>Delete Contact</Text>
       </TouchableOpacity>
@@ -88,9 +79,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
-  appbarItems:{
-   
-  },
   customAppBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -98,6 +86,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 15,
     backgroundColor: '#d3d3d3',
+  },
+  appbarItems: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 18,

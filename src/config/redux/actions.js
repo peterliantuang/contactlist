@@ -10,6 +10,8 @@ export const SET_CONTACTS = 'SET_CONTACTS';
 export const addContact = (contact) => async (dispatch) => {
   try {
     const newContact = { id: uuid.v4(), ...contact };
+    console.log('id:'+uuid.v4()+ ' contacts: ')
+    console.log(contact)
     const contacts = await getContactsFromStorage();
     contacts.push(newContact);
     await AsyncStorage.setItem('contacts', JSON.stringify(contacts));

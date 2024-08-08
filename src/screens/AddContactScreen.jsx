@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet,Alert, Image } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { addContact, updateContact } from '../config/redux/actions';
 
@@ -63,16 +63,16 @@ const AddContactScreen = ({ route, navigation }) => {
         style={styles.input}
         placeholder="Full name"
         placeholderTextColor="#888"
-        value={name}
-        onChangeText={setName}
+        defaultValue={name}
+        onChangeText={newName => setName(newName)}
       />
       <TextInput
         style={styles.input}
         placeholder="Phone"
         placeholderTextColor="#888"
         keyboardType="phone-pad"
-        value={phone}
-        onChangeText={setPhone}
+        defaultValue={phone}
+        onChangeText={newPhone => setPhone(newPhone)}
       />
     </View>
   );

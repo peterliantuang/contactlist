@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, SectionList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector, useDispatch } from 'react-redux';
-import { loadContacts } from '../config/redux/actions';
+import { loadContacts, deleteContact } from '../config/redux/contactsSlice';
 
 const ContactListScreen = ({ navigation }) => {
   const [search, setSearch] = useState('');
@@ -16,8 +16,24 @@ const ContactListScreen = ({ navigation }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    navigation.setOptions({
+      headerShown: !isSearchFocused,
+      header: () => (
+        <View style={styles.headerContainer}>
+          <View style={styles.headerLeft}>
+            <TouchableOpacity style={styles.headerIcon}>
+              <Icon name="chevron-back" size={27} color="#007AFF" />
+              <Text style={styles.headerText}>Lists</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('AddContact')}>
+            <Icon name="add" size={30} color="#007AFF" />
+          </TouchableOpacity>
+        </View>
+      ),
+    });
     dispatch(loadContacts());
-  }, [dispatch]);
+  }, [navigation, dispatch]);
 
   const handleScroll = (event) => {
     searchContainerRef.current?.measure((fx, fy, width, height, px, py) => {
@@ -144,12 +160,35 @@ const styles = StyleSheet.create({
   listContentContainer: {
     paddingHorizontal: 10,
   },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    height: 80,
+    backgroundColor: '#000',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerText: {
+    fontSize: 18,
+    color: '#007AFF',
+    marginRight: 10,
+  },
   headerTitle: {
     fontSize: 34,
     fontWeight: 'bold',
     paddingHorizontal: 10,
     paddingVertical: 10,
     color: '#fff',
+  },
+  headerIcon: {
+    marginHorizontal: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -184,13 +223,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
   },
-  myName: {
-    fontWeight: 'bold',
-    fontSize: 20,
+  myName:{
+    fontWeight:'bold',
+    fontSize:20
   },
   contactType: {
     color: '#999',
-    fontSize: 14,
+    fontSize: 16,
   },
   sectionHeader: {
     paddingHorizontal: 10,
@@ -200,9 +239,9 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   profileIcon: {
-    borderRadius: 25,
-    width: 50,
-    height: 50,
+    borderRadius: 50,
+    width: 80,
+    height: 80,
   },
   stickySearchContainer: {
     position: 'absolute',
