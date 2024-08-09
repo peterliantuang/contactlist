@@ -5,15 +5,24 @@ import uuid from 'react-native-uuid';
 const STORAGE_KEY = 'contacts';
 
 export const loadContacts = createAsyncThunk('contacts/loadContacts', async (_, { dispatch }) => {
-  console.log('--- loading from local storage ')
+  console.log('--- loading from local storage ');
   const contacts = await AsyncStorage.getItem(STORAGE_KEY);
   const parsedContacts = contacts ? JSON.parse(contacts) : [];
+  
+  // Sort contacts in ascending order by name
+  parsedContacts.sort((a, b) => a.name.localeCompare(b.name));
+  
   dispatch(setContacts(parsedContacts));
   return parsedContacts;
 });
 
+export const filteredContacts = async (contacts) => {
+  console.log('--- fildering contacts ');
+};
+
+
 export const saveContacts = async (contacts) => {
-  console.log('--- saving to local storage : contacts', JSON.stringify(contacts));
+  console.log('--- saving to local storage ');
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
 };
 
@@ -28,10 +37,17 @@ const contactsSlice = createSlice({
       state.contacts = action.payload;
       state.loading = false;
     },
+    filterContactss:(state, action) =>{
+      console.log('----')
+    },
     addContact: (state, action) => {
       const { name, phone } = action.payload;
       console.log('log from redux:  name : ' + name + ' phone: ' + phone);
       state.contacts.push({ id: uuid.v4(), name, phone });
+      
+      // Sort contacts in ascending order by name
+      state.contacts.sort((a, b) => a.name.localeCompare(b.name));
+      
       saveContacts(state.contacts);
     },
     updateContact: (state, action) => {
@@ -40,10 +56,18 @@ const contactsSlice = createSlice({
       if (index !== -1) {
         state.contacts[index] = { ...state.contacts[index], ...changes };
       }
+      
+      // Sort contacts in ascending order by name
+      state.contacts.sort((a, b) => a.name.localeCompare(b.name));
+      
       saveContacts(state.contacts);
     },
     deleteContact: (state, action) => {
       const newState = state.contacts.filter(contact => contact.id !== action.payload);
+      
+      // Sort contacts in ascending order by name
+      newState.sort((a, b) => a.name.localeCompare(b.name));
+      
       saveContacts(newState);
       state.contacts = newState;
     },

@@ -7,6 +7,7 @@ const AddContactScreen = ({ route, navigation }) => {
   const { contact = {}, isEdit = false } = route.params || {};
   const [name, setName] = useState(contact?.name || '');
   const [phone, setPhone] = useState(contact?.phone || '');
+  const [isDisabled, setIsDisabled] = useState(true); // Initially disabled
   const dispatch = useDispatch();
 
   useLayoutEffect(() => {
@@ -18,12 +19,32 @@ const AddContactScreen = ({ route, navigation }) => {
       ),
       headerTitle: isEdit ? 'Edit Contact' : 'New Contact',
       headerTitleAlign: 'center',
+      headerTitleStyle: {
+        fontSize: 18, // Decrease the font size here
+      },
       headerRight: () => (
-        <TouchableOpacity onPress={handleDone}>
-          <Text style={styles.doneText}>Done</Text>
+        <TouchableOpacity onPress={handleDone}  >
+          {isDisabled ? (<Text></Text>) : (<Text style={styles.doneText}>Done</Text>)}
         </TouchableOpacity>
       ),
     });
+
+    const updateDoneClickable = ()=>{
+      
+      // console.log('name : '+name + ' phone: '+phone)
+      console.log( '------')
+      if (name.length > 2 && phone.length > 2) {
+        console.log('--- enabled button');
+        setIsDisabled(false)
+      }else{
+        setIsDisabled(true)
+        console.log('disable button')
+      }
+
+      console.log(" --- isDisabled: "+isDisabled)
+
+    }
+    updateDoneClickable()
   }, [navigation, isEdit, name, phone]);
 
   const handleCancel = () => {
@@ -98,7 +119,7 @@ const styles = StyleSheet.create({
   },
   photoSection: {
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: 50,
   },
   photo: {
     width: 100,
@@ -119,7 +140,7 @@ const styles = StyleSheet.create({
   },
   addPhotoText: {
     color: '#007AFF',
-    fontSize: 18,
+    fontSize: 16,
     marginTop: 10,
   },
   input: {

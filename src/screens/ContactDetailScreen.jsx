@@ -1,12 +1,17 @@
 import React, { useLayoutEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { deleteContact } from '../config/redux/contactsSlice';
 
 const ContactDetailScreen = ({ route, navigation }) => {
-  const { contact } = route.params;
+  const { contactId } = route.params;
   const dispatch = useDispatch();
+
+  // Retrieve the contact from the store using the contact ID
+  const contact = useSelector(state =>
+    state.contacts.contacts.find(contact => contact.id === contactId)
+  );
 
   const getInitials = (name) => {
     const nameArray = name.split(' ');
@@ -18,12 +23,20 @@ const ContactDetailScreen = ({ route, navigation }) => {
     navigation.setOptions({
       headerShown: false,
     });
-  }, [navigation, contact]);
+  }, [navigation]);
 
   const handleDelete = () => {
     dispatch(deleteContact(contact.id));
     navigation.goBack();
   };
+
+  if (!contact) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Contact not found.</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -32,7 +45,10 @@ const ContactDetailScreen = ({ route, navigation }) => {
           <Icon name="chevron-back" size={30} color="#007AFF" style={{ paddingLeft: 10 }} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}></Text>
-        <TouchableOpacity style={styles.appbarItems} onPress={() => navigation.navigate('AddContact', { contact, isEdit: true })}>
+        <TouchableOpacity
+          style={styles.appbarItems}
+          onPress={() => navigation.navigate('AddContact', { contact, isEdit: true })}
+        >
           <Text style={styles.editText}>Edit</Text>
         </TouchableOpacity>
       </View>
@@ -46,7 +62,7 @@ const ContactDetailScreen = ({ route, navigation }) => {
             <Icon name="chatbubble-outline" size={28} color="#fff" />
             <Text style={styles.actionText}>message</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionIcon}>
+          <TouchableOpacity style={styles.actionIcon} onPress={()=> navigation.navigate("CallingScreen")}>
             <Icon name="call-outline" size={28} color="#fff" />
             <Text style={styles.actionText}>call</Text>
           </TouchableOpacity>
@@ -85,9 +101,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 5,
     paddingVertical: 15,
-    marginTop:15,
-    borderTopRightRadius:20,
-    borderTopLeftRadius:20,
+    marginTop: 15,
+    borderTopRightRadius: 20,
+    borderTopLeftRadius: 20,
     backgroundColor: '#d3d3d3',
   },
   appbarItems: {
@@ -178,6 +194,12 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     color: 'red',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 

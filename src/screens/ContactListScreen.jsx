@@ -1,21 +1,65 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, SectionList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector, useDispatch } from 'react-redux';
-import { loadContacts, deleteContact } from '../config/redux/contactsSlice';
+import { loadContacts, addContact } from '../config/redux/contactsSlice';
+import uuid from 'react-native-uuid';
+
+// Utility functions for generating random names and phone numbers
+const getRandomName = () => {
+  const firstNames = ['John', 'Jane', 'Michael', 'Emily', 'Jessica', 'Daniel', 'Sarah', 'James', 'Laura', 'David'];
+  const lastNames = ['Smith', 'Johnson', 'Brown', 'Williams', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
+  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+  const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+  return `${firstName} ${lastName}`;
+};
+
+const getRandomPhoneNumber = () => {
+  const randomDigits = () => Math.floor(Math.random() * 10);
+  return `(${randomDigits()}${randomDigits()}${randomDigits()}) ${randomDigits()}${randomDigits()}${randomDigits()}-${randomDigits()}${randomDigits()}${randomDigits()}${randomDigits()}`;
+};
 
 const ContactListScreen = ({ navigation }) => {
   const [search, setSearch] = useState('');
-  const [isSearchSticky, setIsSearchSticky] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const searchContainerRef = useRef(null);
-  const stickySearchRef = useRef(null);
   const searchInputRef = useRef(null);
-  const stickySearchInputRef = useRef(null);
   const contacts = useSelector(state => state.contacts.contacts);
   const dispatch = useDispatch();
 
+  const scrollOffsetY = useRef(0);
+
+  const handleScroll = (event) => {
+    const currentOffsetY = event.nativeEvent.contentOffset.y;
+
+    // Check if the user has scrolled up and reached the top
+    if (currentOffsetY <= 0 && scrollOffsetY.current > 0) {
+      console.log('Scroll up is ended');
+      setIsSearchFocused(false)
+      setSearch('')
+    }
+
+    // Update the scroll position
+    scrollOffsetY.current = currentOffsetY;
+  };
+
   useEffect(() => {
+    const loadInitialData = async () => {
+      await dispatch(loadContacts());
+      // if (contacts.length < 15) {
+      //   for (let i = 1; i <= 15; i++) {
+      //     dispatch(addContact({
+      //       id: uuid.v4(),
+      //       name: getRandomName(),
+      //       phone: getRandomPhoneNumber(),
+      //     }));
+      //   }
+      // }
+    };
+
+    loadInitialData();
+
+    
+
     navigation.setOptions({
       headerShown: !isSearchFocused,
       header: () => (
@@ -32,37 +76,14 @@ const ContactListScreen = ({ navigation }) => {
         </View>
       ),
     });
-    dispatch(loadContacts());
-  }, [navigation, dispatch]);
-
-  const handleScroll = () => {
-    searchContainerRef.current?.measure((fx, fy, width, height, px, py) => {
-      setIsSearchSticky(py <= 80);
-    });
-  };
+  }, [navigation, dispatch, contacts.length]);
 
   const filteredContacts = contacts.filter(contact => contact.name.toLowerCase().includes(search.toLowerCase()));
-
-  const sectionsListData = isSearchFocused
-    ? [{ title: 'Top Name Matches', data: filteredContacts }]
-    : Object.values(
-        contacts
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .reduce((acc, contact) => {
-            const firstLetter = contact.name[0].toUpperCase();
-            if (!acc[firstLetter]) {
-              acc[firstLetter] = { title: firstLetter, data: [] };
-            }
-            acc[firstLetter].data.push(contact);
-            return acc;
-          }, {})
-      );
 
   const renderHeaderComponent = () => (
     <>
       {!isSearchFocused && <Text style={styles.headerTitle}>Contacts</Text>}
       <TouchableOpacity
-        ref={searchContainerRef}
         style={styles.searchContainer}
         onPress={() => {
           setIsSearchFocused(true);
@@ -80,7 +101,7 @@ const ContactListScreen = ({ navigation }) => {
           onFocus={() => setIsSearchFocused(true)}
         />
         {isSearchFocused && (
-          <TouchableOpacity onPress={() => { setSearch(''); setIsSearchFocused(false); setIsSearchSticky(false); }}>
+          <TouchableOpacity onPress={() => { setSearch(''); setIsSearchFocused(false); }}>
             <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
         )}
@@ -97,53 +118,25 @@ const ContactListScreen = ({ navigation }) => {
     </>
   );
 
+  const renderItem = ({ item }) => (
+    <TouchableOpacity onPress={() => navigation.navigate('ContactDetail', { contactId: item.id })}>
+      <View style={styles.contactItem}>
+        <Text style={styles.contactName}>{item.name}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <View style={styles.container}>
-        <SectionList
+        <FlatList
           ListHeaderComponent={renderHeaderComponent}
-          sections={sectionsListData}
+          data={filteredContacts}
           keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => navigation.navigate('ContactDetail', { contact: item })}>
-              <View style={styles.contactItem}>
-                <Text style={styles.contactName}>{item.name}</Text>
-              </View>
-            </TouchableOpacity>
-          )}
-          renderSectionHeader={({ section: { title } }) => (
-            <Text style={styles.sectionHeader}>{title}</Text>
-          )}
-          contentContainerStyle={styles.listContentContainer}
+          renderItem={renderItem}
           onScroll={handleScroll}
-          scrollEventThrottle={16}
+          contentContainerStyle={styles.listContentContainer}
         />
-        {isSearchSticky && (
-          <TouchableOpacity
-            ref={stickySearchRef}
-            style={[styles.stickySearchContainer, styles.stickyVisible]}
-            onPress={() => {
-              setIsSearchFocused(true);
-              stickySearchInputRef.current?.focus();
-            }}
-          >
-            <Icon name="search-outline" size={20} color="#fff" />
-            <TextInput
-              ref={stickySearchInputRef}
-              style={styles.searchInput}
-              placeholder="Search"
-              placeholderTextColor="#888"
-              value={search}
-              onChangeText={setSearch}
-              onFocus={() => setIsSearchFocused(true)}
-            />
-            {isSearchFocused && (
-              <TouchableOpacity onPress={() => { setSearch(''); setIsSearchFocused(false); setIsSearchSticky(false); }}>
-                <Text style={styles.cancelText}>Cancel</Text>
-              </TouchableOpacity>
-            )}
-          </TouchableOpacity>
-        )}
       </View>
     </KeyboardAvoidingView>
   );
@@ -229,32 +222,11 @@ const styles = StyleSheet.create({
     color: '#999',
     fontSize: 16,
   },
-  sectionHeader: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
   profileIcon: {
     borderRadius: 50,
-    width: 80,
-    height: 80,
-  },
-  stickySearchContainer: {
-    position: 'absolute',
-    left: 20,
-    right: 20,
-    top: -100,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    zIndex: 1,
-    backgroundColor: '#333',
-  },
-  stickyVisible: {
-    top: 0,
+    width: 60,
+    height: 60,
+    marginVertical:10,
   },
 });
 
