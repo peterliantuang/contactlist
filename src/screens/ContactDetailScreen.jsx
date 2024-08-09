@@ -83,8 +83,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
     paddingVertical: 15,
+    marginTop:15,
+    borderTopRightRadius:20,
+    borderTopLeftRadius:20,
     backgroundColor: '#d3d3d3',
   },
   appbarItems: {
@@ -174,7 +177,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 16,
-    color: '#007AFF',
+    color: 'red',
   },
 });
 

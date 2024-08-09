@@ -12,7 +12,7 @@ const ContactListScreen = ({ navigation }) => {
   const stickySearchRef = useRef(null);
   const searchInputRef = useRef(null);
   const stickySearchInputRef = useRef(null);
-  const contacts = useSelector(state => state.contacts);
+  const contacts = useSelector(state => state.contacts.contacts);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -35,17 +35,15 @@ const ContactListScreen = ({ navigation }) => {
     dispatch(loadContacts());
   }, [navigation, dispatch]);
 
-  const handleScroll = (event) => {
+  const handleScroll = () => {
     searchContainerRef.current?.measure((fx, fy, width, height, px, py) => {
       setIsSearchSticky(py <= 80);
     });
   };
 
-  const filteredContacts = contacts.filter(contact =>
-    contact.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredContacts = contacts.filter(contact => contact.name.toLowerCase().includes(search.toLowerCase()));
 
-  const sections = isSearchFocused
+  const sectionsListData = isSearchFocused
     ? [{ title: 'Top Name Matches', data: filteredContacts }]
     : Object.values(
         contacts
@@ -104,7 +102,7 @@ const ContactListScreen = ({ navigation }) => {
       <View style={styles.container}>
         <SectionList
           ListHeaderComponent={renderHeaderComponent}
-          sections={sections}
+          sections={sectionsListData}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => navigation.navigate('ContactDetail', { contact: item })}>
@@ -223,9 +221,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
   },
-  myName:{
-    fontWeight:'bold',
-    fontSize:20
+  myName: {
+    fontWeight: 'bold',
+    fontSize: 20,
   },
   contactType: {
     color: '#999',

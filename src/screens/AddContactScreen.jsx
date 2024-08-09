@@ -1,7 +1,7 @@
 import React, { useState, useLayoutEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet,Alert, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { addContact, updateContact } from '../config/redux/actions';
+import { addContact, updateContact } from '../config/redux/contactsSlice';
 
 const AddContactScreen = ({ route, navigation }) => {
   const { contact = {}, isEdit = false } = route.params || {};
@@ -17,20 +17,21 @@ const AddContactScreen = ({ route, navigation }) => {
         </TouchableOpacity>
       ),
       headerTitle: isEdit ? 'Edit Contact' : 'New Contact',
-      headerTitleAlign: 'center', // Center align the title
+      headerTitleAlign: 'center',
       headerRight: () => (
         <TouchableOpacity onPress={handleDone}>
           <Text style={styles.doneText}>Done</Text>
         </TouchableOpacity>
       ),
     });
-  }, [navigation, isEdit]);
+  }, [navigation, isEdit, name, phone]);
 
   const handleCancel = () => {
     navigation.goBack();
   };
 
   const handleDone = () => {
+
     if (isEdit) {
       dispatch(updateContact({ ...contact, name, phone }));
     } else {
@@ -40,7 +41,8 @@ const AddContactScreen = ({ route, navigation }) => {
   };
 
   const getInitials = (name) => {
-    const nameArray = name.split(' ');
+    if (!name) return '';
+    const nameArray = name.trim().split(' ');
     const initials = nameArray.map(part => part.charAt(0)).join('');
     return initials.toUpperCase();
   };
@@ -63,7 +65,7 @@ const AddContactScreen = ({ route, navigation }) => {
         style={styles.input}
         placeholder="Full name"
         placeholderTextColor="#888"
-        defaultValue={name}
+        value={name}
         onChangeText={newName => setName(newName)}
       />
       <TextInput
@@ -71,7 +73,7 @@ const AddContactScreen = ({ route, navigation }) => {
         placeholder="Phone"
         placeholderTextColor="#888"
         keyboardType="phone-pad"
-        defaultValue={phone}
+        value={phone}
         onChangeText={newPhone => setPhone(newPhone)}
       />
     </View>
