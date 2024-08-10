@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {useSelector, useDispatch} from 'react-redux';
 import {loadContacts, addContact} from '../config/redux/contactsSlice';
 import uuid from 'react-native-uuid';
+import { checkFirstStart } from '../config/redux/firstStartSlice';
 
 // Utility functions for generating random names and phone numbers
 const getRandomName = () => {
@@ -56,6 +57,7 @@ const ContactListScreen = ({navigation}) => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef(null);
   const contacts = useSelector(state => state.contacts.contacts);
+  const isFirstStart = useSelector((state) => state.firstStart.isFirstStart);
   const dispatch = useDispatch();
 
   const scrollOffsetY = useRef(0);
