@@ -11,8 +11,7 @@
 * Added App Icon and change App name to "Contacts"
 
 ## Features
-* When you first start the app, it will generate around 
-  15 random contacts for test perpose
+* will generate around 10 random contacts for test perpose
 
 * The contact cane be added, edited or deleted as you wish.
 * The contact listed are sorted by Accending order.
