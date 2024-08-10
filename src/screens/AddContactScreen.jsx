@@ -78,9 +78,7 @@ const AddContactScreen = ({ route, navigation }) => {
         ) : (
           <Image source={require('../assets/user-placeholder.png')} style={styles.photo} />
         )}
-        <TouchableOpacity>
-          <Text style={styles.addPhotoText}>Add Photo</Text>
-        </TouchableOpacity>
+        
       </View>
       <TextInput
         style={styles.input}
